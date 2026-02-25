@@ -21,7 +21,12 @@ Agent-In-The-Boxは、単なるプロンプト集ではありません。Cursor�
 
 1. このリポジトリをテンプレートとして使用し、あなたのプロジェクト（または専用の脳リポジトリ）としてクローンします。
 2. Cursorの「Agentプロファイル」としてこのリポジトリを指定します。
-3. `.cursorrules` が自動的に読み込まれ、あなたの「Alter-Ego」が覚醒します。
+3. **エージェントを常駐させる**: ターミナルで `python scripts/auto_loop.py` を実行します。エージェントがワークスペースを見守り、気づいたことを `state.md` に書き込みます。
+
+## 🧬 主要機能
+
+- **Auto-Loop Engine (ALE)**: 2時間おきにワークスペースをパトロールし、変更を `state.md` に自動反映。あなたが Cursor を開いたとき、エージェントが最新の情報を把握している状態を作ります。
+- **Personality Learning (LoRA Ready)**: `python scripts/collect_training_data.py` を実行することで、あなたのADRからエンジニアとしての「思考の癖」を抽出し、将来的なLoRA学習用データを作成します。
 
 ## 📁 ディレクトリ構造
 

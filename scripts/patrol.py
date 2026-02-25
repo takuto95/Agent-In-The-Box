@@ -1,20 +1,15 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Alter-Ego 自律パトロールスクリプト。
-ワークスペースの変化を検知し、エージェント（またはユーザー）に日報形式で報告します。
-"""
-
 import os
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
 
+# Project Root
 BASE_DIR = Path(__file__).parent.parent
 BRAIN_DIR = BASE_DIR / ".agent" / "brain"
 REPORTS_DIR = BRAIN_DIR / "reports"
 
 def patrol_workspace():
+    """ワークスペースの変更を検知し、レポートを作成する"""
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     
     now = datetime.now()
@@ -31,6 +26,9 @@ def patrol_workspace():
         for f in files:
             file_path = Path(root) / f
             try:
+                # ignore self-generated reports
+                if ".agent" in str(file_path): continue
+                
                 mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
                 if mtime > yesterday:
                     modified_files.append((file_path, mtime))
@@ -41,30 +39,25 @@ def patrol_workspace():
     report_file = REPORTS_DIR / f"patrol_{now.strftime('%Y%m%d_%H%M')}.md"
     
     with open(report_file, "w", encoding="utf-8") as rf:
-        rf.write(f"# Alter-Ego パトロール報告 ({now.strftime('%Y-%m-%d %H:%M')})\n\n")
+        rf.write(f"# パトロール報告 ({now.strftime('%Y-%m-%d %H:%M')})\n\n")
         
         if not modified_files:
             rf.write("過去24時間にワークスペースの変更は検知されませんでした。\n")
         else:
             rf.write("## 🛠️ 最近の変更点\n")
-            # 種類別に分類
             for path, mtime in sorted(modified_files, key=lambda x: x[1], reverse=True):
-                rel_path = path.relative_to(BASE_DIR)
-                rf.write(f"- `{rel_path}` ({mtime.strftime('%H:%M')})\n")
+                try:
+                    rel_path = path.relative_to(BASE_DIR)
+                    rf.write(f"- `{rel_path}` ({mtime.strftime('%H:%M')})\n")
+                except:
+                    rf.write(f"- `{path}` ({mtime.strftime('%H:%M')})\n")
                 
-        rf.write("\n## 🎓 今日の共進化（Co-Evolution Insight）\n")
-        rf.write("- あなたの変更から、私が連想した関連知見です。対等な議論の種にしましょう。\n")
-        # 簡易的な連想ロジック（実際はナレッジグラフから引用するのが理想だが、まずはプロンプトベース）
-        if any(".md" in str(p) for p, _ in modified_files):
-             rf.write("- **関連知見**: 『オブザーバビリティ・エンジニアリング』の知見に基づき、変更箇所の「因果関係」を可視化する準備があります。\n")
-        else:
-             rf.write("- **関連知見**: 最新の「Agentic Workflow」の観点から、現在のスクリプトをより自律的に改善する余地を検討中です。\n")
-
-        rf.write("\n## 🧠 自己考察\n")
-        rf.write("- ナレッジベースの昇格（Native移行）により、RAGの精度が向上しています。\n")
-        rf.write("- ユーザーとの「共同進化ロードマップ」に基づき、共進化モードへ移行しました。\n")
+        rf.write("\n## 🧠 エージェントの気づき\n")
+        rf.write("- あなたの変更から、私が学習し、Cursorでの回答精度を高めるための準備をしています。\n")
+        rf.write("- 重要な変更があれば、それをベースに新たなADRを起案することを提案します。\n")
 
     print(f"[SUCCESS] Patrol report generated: {report_file}")
+    return report_file
 
 if __name__ == "__main__":
     patrol_workspace()
